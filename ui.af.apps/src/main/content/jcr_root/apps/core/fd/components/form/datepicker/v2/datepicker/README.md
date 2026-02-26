@@ -96,4 +96,3 @@ We support replace feature that allows replacing Reset Button component to any o
 * **Compatibility**: Cloud
 * **Status**: production-ready
 
-
