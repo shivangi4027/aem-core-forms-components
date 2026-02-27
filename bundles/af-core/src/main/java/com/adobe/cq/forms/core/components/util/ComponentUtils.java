@@ -63,11 +63,34 @@ public class ComponentUtils {
     private static final String[] EDGE_DELIVERY_RESOURCE_TYPES = new String[] { "core/franklin/components/page/v1/page" };
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtils.class);
 
-    /**
-     * Private constructor to prevent instantiation of utility class.
-     */
     private ComponentUtils() {
         // NOOP
+    }
+
+    /**
+     * Checks whether a feature toggle is enabled via a system property. The property is set/unset
+     * by the Granite Toggle API when the toggle is wired via OSGi factory
+     * {@code com.adobe.granite.toggle.monitor.systemproperty} (see
+     * {@link com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants} for setup).
+     * <p>
+     * Convention: the system property name is the toggle ID; value {@code "true"} (via
+     * {@link Boolean#parseBoolean(String)}) means enabled.
+     *
+     * @param toggleId the toggle identifier (also used as the system property name)
+     * @return true if the system property is set to "true", false otherwise
+     */
+    public static boolean isToggleEnabledBySystemProperty(@NotNull String toggleId) {
+        return Boolean.parseBoolean(System.getProperty(toggleId, "false"));
+    }
+
+    /**
+     * Checks whether a feature toggle is enabled (system property only).
+     *
+     * @param toggleId the toggle identifier (e.g. from {@link com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants})
+     * @return true if the toggle is enabled, false otherwise
+     */
+    public static boolean isToggleEnabled(@NotNull String toggleId) {
+        return isToggleEnabledBySystemProperty(toggleId);
     }
 
     /**

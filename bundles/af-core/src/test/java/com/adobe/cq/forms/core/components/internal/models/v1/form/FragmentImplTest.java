@@ -30,6 +30,7 @@ import java.util.stream.StreamSupport;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.i18n.ResourceBundleProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ import org.mockito.Mockito;
 import com.adobe.cq.export.json.ComponentExporter;
 import com.adobe.cq.export.json.SlingModelFilter;
 import com.adobe.cq.forms.core.Utils;
+import com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants;
 import com.adobe.cq.forms.core.components.internal.form.FormConstants;
 import com.adobe.cq.forms.core.components.models.form.FieldType;
 import com.adobe.cq.forms.core.components.models.form.FormClientLibManager;
@@ -97,6 +99,17 @@ public class FragmentImplTest {
         });
     }
 
+    @AfterEach
+    void tearDown() {
+        System.clearProperty(FeatureToggleConstants.FT_FRAGMENT_MERGE_CONTAINER_RULES_EVENTS);
+    }
+
+    /** Returns a fragment with the merge toggle enabled (system property set for test). */
+    private Fragment getFragmentWithMergeEnabled(String path) {
+        System.setProperty(FeatureToggleConstants.FT_FRAGMENT_MERGE_CONTAINER_RULES_EVENTS, "true");
+        return Utils.getComponentUnderTest(path, Fragment.class, context);
+    }
+
     @Test
     void testExportedType() throws Exception {
         Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT, Fragment.class, context);
@@ -144,7 +157,7 @@ public class FragmentImplTest {
 
     @Test
     void testFragmentContainerEventsIncludedInGetEvents() {
-        Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT, Fragment.class, context);
+        Fragment fragment = getFragmentWithMergeEnabled(PATH_FRAGMENT);
         Map<String, String[]> events = fragment.getEvents();
         assertNotNull(events);
         assertTrue("Stitched fragment should include events from referenced fragment container",
@@ -155,7 +168,7 @@ public class FragmentImplTest {
 
     @Test
     void testFragmentContainerRulesParallelToEvents() {
-        Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT, Fragment.class, context);
+        Fragment fragment = getFragmentWithMergeEnabled(PATH_FRAGMENT);
         Map<String, String> rules = fragment.getRules();
         Map<String, String[]> events = fragment.getEvents();
         assertNotNull(rules);
@@ -168,7 +181,7 @@ public class FragmentImplTest {
 
     @Test
     void testPlaceholderAndFragmentContainerRulesEventsMerged() {
-        Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT_WITH_PLACEHOLDER_RULES, Fragment.class, context);
+        Fragment fragment = getFragmentWithMergeEnabled(PATH_FRAGMENT_WITH_PLACEHOLDER_RULES);
         Map<String, String> rules = fragment.getRules();
         Map<String, String[]> events = fragment.getEvents();
         Map<String, Object> properties = fragment.getProperties();
@@ -195,8 +208,35 @@ public class FragmentImplTest {
     }
 
     @Test
+    void testNoMergeWhenToggleDisabled() throws Exception {
+        String key = FeatureToggleConstants.FT_FRAGMENT_MERGE_CONTAINER_RULES_EVENTS;
+        String saved = System.getProperty(key);
+        try {
+            System.setProperty(key, "false");
+            Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT_WITH_PLACEHOLDER_RULES, Fragment.class, context);
+            Map<String, String> rules = fragment.getRules();
+            Map<String, String[]> events = fragment.getEvents();
+
+            assertNotNull(rules);
+            assertNotNull(events);
+            assertEquals("When toggle is off, only panel rules are used", "panelVisibleRule", rules.get("visible"));
+            assertTrue("When toggle is off, only panel events are used", events.containsKey("initialize"));
+            Assertions.assertArrayEquals(new String[] { "panelInit" }, events.get("initialize"),
+                "When toggle is off, fragment container events are not merged; only panel initialize");
+            Assertions.assertFalse(events.containsKey("change"),
+                "When toggle is off, fragment container events like change are not included");
+        } finally {
+            if (saved != null) {
+                System.setProperty(key, saved);
+            } else {
+                System.clearProperty(key);
+            }
+        }
+    }
+
+    @Test
     void testJSONExport() throws Exception {
-        Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT, Fragment.class, context);
+        Fragment fragment = getFragmentWithMergeEnabled(PATH_FRAGMENT);
         Utils.testJSONExport(fragment, Utils.getTestExporterJSONPath(BASE, PATH_FRAGMENT));
     }
 
@@ -208,7 +248,7 @@ public class FragmentImplTest {
 
     @Test
     void testJSONExportWithFragmentPath() throws Exception {
-        Fragment fragment = Utils.getComponentUnderTest(PATH_FRAGMENT_WITH_FRAGMENT_PATH, Fragment.class, context);
+        Fragment fragment = getFragmentWithMergeEnabled(PATH_FRAGMENT_WITH_FRAGMENT_PATH);
         Utils.testJSONExport(fragment, Utils.getTestExporterJSONPath(BASE, PATH_FRAGMENT_WITH_FRAGMENT_PATH), Views.Author.class);
     }
 

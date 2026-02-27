@@ -34,6 +34,7 @@ import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants;
 import com.adobe.cq.forms.core.components.internal.form.FormConstants;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,6 +96,58 @@ public class ComponentUtilsTest {
         assertTrue(ComponentUtils.isFragmentComponent(resource));
         vm.remove(FormConstants.PROP_FRAGMENT_PATH);
         assertFalse(ComponentUtils.isFragmentComponent(resource));
+    }
+
+    @Test
+    public void testIsToggleEnabledBySystemPropertyTrue() {
+        String key = "test.toggle." + System.nanoTime();
+        try {
+            System.setProperty(key, "true");
+            assertTrue(ComponentUtils.isToggleEnabledBySystemProperty(key));
+        } finally {
+            System.clearProperty(key);
+        }
+    }
+
+    @Test
+    public void testIsToggleEnabledBySystemPropertyFalse() {
+        String key = "test.toggle." + System.nanoTime();
+        try {
+            System.setProperty(key, "false");
+            assertFalse(ComponentUtils.isToggleEnabledBySystemProperty(key));
+        } finally {
+            System.clearProperty(key);
+        }
+    }
+
+    @Test
+    public void testIsToggleEnabledBySystemPropertyUnset() {
+        String key = "test.toggle.unset." + System.nanoTime();
+        assertFalse(ComponentUtils.isToggleEnabledBySystemProperty(key));
+    }
+
+    @Test
+    public void testIsToggleEnabledRespectsSystemProperty() {
+        String key = FeatureToggleConstants.FT_FRAGMENT_MERGE_CONTAINER_RULES_EVENTS;
+        String saved = System.getProperty(key);
+        try {
+            System.setProperty(key, "true");
+            assertTrue(ComponentUtils.isToggleEnabled(key));
+            System.setProperty(key, "false");
+            assertFalse(ComponentUtils.isToggleEnabled(key));
+        } finally {
+            if (saved != null) {
+                System.setProperty(key, saved);
+            } else {
+                System.clearProperty(key);
+            }
+        }
+    }
+
+    @Test
+    public void testIsToggleEnabledUnsetReturnsFalse() {
+        String key = "test.toggle.unset." + System.nanoTime();
+        assertFalse(ComponentUtils.isToggleEnabled(key));
     }
 
     @Test

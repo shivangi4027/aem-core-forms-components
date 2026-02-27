@@ -48,6 +48,7 @@ import com.adobe.aemds.guide.utils.TranslationUtils;
 import com.adobe.cq.export.json.ComponentExporter;
 import com.adobe.cq.export.json.ExporterConstants;
 import com.adobe.cq.export.json.SlingModelFilter;
+import com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants;
 import com.adobe.cq.forms.core.components.internal.form.FormConstants;
 import com.adobe.cq.forms.core.components.internal.form.ReservedProperties;
 import com.adobe.cq.forms.core.components.models.form.FormClientLibManager;
@@ -244,7 +245,7 @@ public class FragmentImpl extends PanelImpl implements Fragment {
 
     @Override
     public Map<String, String[]> getEvents() {
-        if (fragmentContainer != null) {
+        if (fragmentContainer != null && isFragmentMergeContainerRulesEventsEnabled()) {
             Map<String, String[]> userEvents = new LinkedHashMap<>(super.getEvents());
             Map<String, String[]> fragmentEvents = getEventsForResource(fragmentContainer);
             for (Map.Entry<String, String[]> entry : fragmentEvents.entrySet()) {
@@ -264,12 +265,16 @@ public class FragmentImpl extends PanelImpl implements Fragment {
 
     @Override
     public Map<String, String> getRules() {
-        if (fragmentContainer != null) {
+        if (fragmentContainer != null && isFragmentMergeContainerRulesEventsEnabled()) {
             Map<String, String> merged = new LinkedHashMap<>(getRulesForResource(fragmentContainer));
             merged.putAll(super.getRules());
             return merged;
         }
         return super.getRules();
+    }
+
+    private boolean isFragmentMergeContainerRulesEventsEnabled() {
+        return ComponentUtils.isToggleEnabled(FeatureToggleConstants.FT_FRAGMENT_MERGE_CONTAINER_RULES_EVENTS);
     }
 
     private String getClientLibForFragment() {
