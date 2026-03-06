@@ -54,6 +54,7 @@ import com.adobe.aemds.guide.model.CustomPropertyInfo;
 import com.adobe.aemds.guide.utils.GuideUtils;
 import com.adobe.cq.forms.core.components.datalayer.FormComponentData;
 import com.adobe.cq.forms.core.components.internal.datalayer.ComponentDataImpl;
+import com.adobe.cq.forms.core.components.internal.form.FeatureToggleConstants;
 import com.adobe.cq.forms.core.components.internal.form.FormConstants;
 import com.adobe.cq.forms.core.components.internal.form.ReservedProperties;
 import com.adobe.cq.forms.core.components.models.form.BaseConstraint;
@@ -78,6 +79,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import static com.adobe.cq.forms.core.components.util.ComponentUtils.isAuthorMode;
+import static com.adobe.cq.forms.core.components.util.ComponentUtils.isToggleEnabled;
 
 public class AbstractFormComponentImpl extends AbstractComponentImpl implements FormComponent {
     @ValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = ReservedProperties.PN_DATAREF)
@@ -114,8 +118,8 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
     private Resource resource;
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = ReservedProperties.PN_DOR_EXCLUSION)
-    @Default(booleanValues = false)
-    protected boolean dorExclusion;
+    @Nullable
+    protected Boolean dorExclusion;
 
     @ValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = ReservedProperties.PN_DOR_COLSPAN)
     @Nullable
@@ -324,16 +328,22 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
     public @NotNull Map<String, Object> getProperties() {
         Map<String, Object> properties = new LinkedHashMap<>();
         Map<String, Object> customProperties = getCustomProperties();
-        if (customProperties.size() > 0) {
+        if (!customProperties.isEmpty()) {
             customProperties.forEach(properties::putIfAbsent);
         }
-        if (getCustomLayoutProperties().size() != 0) {
+        if (!getCustomLayoutProperties().isEmpty()) {
             properties.put(CUSTOM_PROPERTY_WRAPPER, getCustomLayoutProperties());
         }
-        if (getDorProperties().size() > 0) {
+        if (!getDorProperties().isEmpty()) {
             properties.put(CUSTOM_DOR_PROPERTY_WRAPPER, getDorProperties());
         }
         properties.put(CUSTOM_JCR_PATH_PROPERTY_WRAPPER, getPath());
+        if (isAuthorMode(request)) {
+            Map<String, Object> rulesProperties = getRulesProperties();
+            if (!rulesProperties.isEmpty()) {
+                properties.put(CUSTOM_RULE_PROPERTY_WRAPPER, rulesProperties);
+            }
+        }
         List<String> disabledScripts = getDisabledXFAScripts();
         if (!disabledScripts.isEmpty()) {
             properties.put("fd:disabledXfaScripts", disabledScripts);
@@ -499,7 +509,9 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
     @NotNull
     public Map<String, String[]> getEvents() {
         Map<String, String[]> userEvents = new LinkedHashMap<>();
-        userEvents.put("custom:setProperty", new String[] { "$event.payload" });
+        if (!isToggleEnabled(FeatureToggleConstants.FT_SKIP_DEFAULT_SET_PROPERTY_EVENT)) {
+            userEvents.put("custom:setProperty", new String[] { "$event.payload" });
+        }
         userEvents.putAll(getEventsForResource(resource));
         return userEvents;
     }
@@ -670,7 +682,9 @@ public class AbstractFormComponentImpl extends AbstractComponentImpl implements 
     @JsonIgnore
     public Map<String, Object> getDorProperties() {
         Map<String, Object> customDorProperties = new LinkedHashMap<>();
-        customDorProperties.put("dorExclusion", dorExclusion);
+        if (dorExclusion != null) {
+            customDorProperties.put("dorExclusion", dorExclusion);
+        }
         if (dorColspan != null) {
             customDorProperties.put("dorColspan", dorColspan);
         }

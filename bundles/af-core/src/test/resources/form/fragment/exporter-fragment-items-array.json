@@ -1,5 +1,5 @@
 {
-  "id": "fragment-c83f64bf1d",
+  "id": "fragment-b6e9b38d43",
   "fieldType": "panel",
   "name": "fragment-123",
   "type": "object",
@@ -7,26 +7,21 @@
   "minOccur": 0,
   "maxOccur": 4,
   "fragmentPath": "/content/affragment",
+  "events": {
+    "custom:setProperty": ["$event.payload"]
+  },
   "properties": {
     "customProp": "customPropValue",
-    "fd:path": "/content/fragment-with-fragment-path",
+    "fd:path": "/content/fragment",
     "fd:fragment": true,
     "fd:viewType": "fragment"
-  },
-  "events": {
-    "custom:setProperty": ["$event.payload"],
-    "change": ["fragmentChangeHandler"],
-    "initialize": ["fragInit"]
-  },
-  "rules": {
-    "visible": "fragmentVisibleRule"
   },
   "label": {
     "value": "Fragment"
   },
-  ":itemsOrder": ["textinput"],
-  ":items": {
-    "textinput": {
+  ":type": "core/fd/components/form/fragment/v1/fragment",
+  "items": [
+    {
       "id": "textinput-233cc688ba",
       "fieldType": "text-input",
       "name": "fragmenttextinput",
@@ -34,14 +29,13 @@
       "label": {
         "value": "Text Input"
       },
-      "properties": {
-        "fd:path": "/content/affragment/jcr:content/guideContainer/textinput"
-      },
       "events": {
         "custom:setProperty": ["$event.payload"]
       },
+      "properties": {
+        "fd:path": "/content/affragment/jcr:content/guideContainer/textinput"
+      },
       ":type": "core/fd/components/form/textinput/v1/textinput"
     }
-  },
-  ":type": "core/fd/components/form/fragment/v1/fragment"
+  ]
 }

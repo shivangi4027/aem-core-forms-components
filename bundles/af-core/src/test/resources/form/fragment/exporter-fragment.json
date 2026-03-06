@@ -6,13 +6,9 @@
   "repeatable": true,
   "minOccur": 0,
   "maxOccur": 4,
+  "fragmentPath": "/content/affragment",
   "properties": {
     "customProp": "customPropValue",
-    "fd:dor": {
-      "dorExclusion": false,
-      "dorExcludeTitle": false,
-      "dorExcludeDescription": false
-    },
     "fd:path": "/content/fragment",
     "fd:fragment": true,
     "fd:viewType": "fragment"
@@ -39,9 +35,6 @@
         "value": "Text Input"
       },
       "properties": {
-        "fd:dor": {
-          "dorExclusion": false
-        },
         "fd:path": "/content/affragment/jcr:content/guideContainer/textinput"
       },
       "events": {

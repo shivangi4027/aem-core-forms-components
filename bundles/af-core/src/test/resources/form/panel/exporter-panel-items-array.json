@@ -1,42 +1,27 @@
 {
-  "id": "panel-81f441fcab",
+  "id": "panel-d29e24f4ca",
   "fieldType": "panel",
   "name": "abc",
-  "description": "dependent names description",
-  "tooltip": "dependent names tooltip",
   "label": {
     "value": "dependent names"
   },
   "events": {
-    "change": [
-      "some expression 2"
-    ],
     "custom:setProperty": [
       "$event.payload"
     ]
   },
-  "rules": {
-    "visible": "some expression"
-  },
   "properties": {
-    "afs:layout": {
-      "tooltipVisible": false
-    },
-    "fd:path": "/content/rules-panel"
+    "fd:path": "/content/panel",
+    "customProp": "customPropValue"
   },
-  ":itemsOrder": [
-    "textinput"
-  ],
   ":type": "core/fd/components/form/panel/v1/panel",
-  ":items": {
-    "textinput": {
-      "id": "textinput-bec585e910",
+  "items": [
+    {
+      "id": "textinput-3a2afcbdfd",
       "fieldType": "text-input",
       "name": "abc",
-      "description": "dummy",
       "type": "string",
       "label": {
-        "visible": true,
         "value": "def"
       },
       "events": {
@@ -45,9 +30,9 @@
         ]
       },
       "properties": {
-        "fd:path": "/content/rules-panel/textinput"
+        "fd:path": "/content/panel/textinput"
       },
       ":type": "core/fd/components/form/textinput/v1/textinput"
     }
-  }
+  ]
 }

@@ -17,6 +17,7 @@ package com.adobe.cq.forms.core.components.internal.models.v1.form;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -56,10 +57,9 @@ import com.adobe.cq.forms.core.components.models.form.FormComponent;
 import com.adobe.cq.forms.core.components.models.form.FormContainer;
 import com.adobe.cq.forms.core.components.models.form.Fragment;
 import com.adobe.cq.forms.core.components.util.ComponentUtils;
-import com.adobe.cq.forms.core.components.views.Views;
 import com.day.cq.i18n.I18n;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Model(
     adaptables = { SlingHttpServletRequest.class, Resource.class },
@@ -87,12 +87,14 @@ public class FragmentImpl extends PanelImpl implements Fragment {
     @ValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = ReservedProperties.PN_FRAGMENT_PATH)
     private String fragmentPath;
 
+    @ValueMapValue(injectionStrategy = InjectionStrategy.OPTIONAL, name = ReservedProperties.PN_LAZY)
+    private Boolean lazy;
+
     private Resource fragmentContainer;
 
     @PostConstruct
     private void initFragmentModel() {
         ResourceResolver resourceResolver = resource.getResourceResolver();
-
         String updatedFragmentPath = this.getFragmentPathBasedOnChannel(fragmentPath);
         fragmentContainer = ComponentUtils.getFragmentContainer(resourceResolver, updatedFragmentPath);
         if (request != null) {
@@ -101,6 +103,9 @@ public class FragmentImpl extends PanelImpl implements Fragment {
             if (formClientLibManager != null && clientLibRef != null) {
                 formClientLibManager.addClientLibRef(clientLibRef);
             }
+        }
+        if (Boolean.TRUE.equals(lazy)) {
+            fragmentContainer = null;
         }
     }
 
@@ -111,13 +116,20 @@ public class FragmentImpl extends PanelImpl implements Fragment {
         return fragmentPath;
     }
 
-    @JsonView(Views.Author.class)
     public String getFragmentPath() {
         return fragmentPath;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    public boolean getLazy() {
+        return Boolean.TRUE.equals(lazy);
+    }
+
     @Override
     public @NotNull Map<String, ? extends ComponentExporter> getExportedItems() {
+        if (ComponentUtils.isToggleEnabled(FeatureToggleConstants.FT_SKIP_ITEMS_MAP)) {
+            return Collections.emptyMap();
+        }
         if (itemModels == null) {
             itemModels = getChildrenModels(request, ComponentExporter.class);
         }
