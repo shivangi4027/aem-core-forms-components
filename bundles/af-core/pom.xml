@@ -462,7 +462,6 @@
             <artifactId>aem-forms-sdk-api</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>com.adobe.aem</groupId>
             <artifactId>aem-sdk-api</artifactId>

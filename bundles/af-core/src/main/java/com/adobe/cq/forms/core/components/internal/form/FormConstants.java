@@ -56,6 +56,9 @@ public final class FormConstants {
     /** The resource type for date picker v1 */
     public static final String RT_FD_FORM_DATE_PICKER_V1 = RT_FD_FORM_PREFIX + "datepicker/v1/datepicker";
 
+    /** The resource type for date picker v2 */
+    public static final String RT_FD_FORM_DATE_PICKER_V2 = RT_FD_FORM_PREFIX + "datepicker/v2/datepicker";
+
     /** The resource type for number input v1 */
     public static final String RT_FD_FORM_NUMBER_INPUT_V1 = RT_FD_FORM_PREFIX + "numberinput/v1/numberinput";
 
@@ -148,6 +151,9 @@ public final class FormConstants {
 
     /** Form definition type indicating submission view */
     public static final String FORM_DEFINITION_SUBMISSION = "submission";
+
+    /** Request attribute set when the form definition is serialized with Publish view */
+    public static final String REQ_ATTR_PUBLISH_VIEW = "fd:publishView";
 
     /** The channel for print */
     public static final String CHANNEL_PRINT = "print";
