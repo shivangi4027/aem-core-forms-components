@@ -88,6 +88,19 @@
                                                          sling:hideResource="{Boolean}true"
                                                          sling:resourceType="granite/ui/components/coral/foundation/container">
                                             </enumsCustom>
+                                            <fieldType
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                                    name="./fieldType"
+                                                    required="{Boolean}true"
+                                                    granite:hidden="true">
+                                                <items jcr:primaryType="nt:unstructured">
+                                                    <item jcr:primaryType="nt:unstructured"
+                                                          text="Checkbox"
+                                                          value="checkbox"
+                                                          selected="{Boolean}true"/>
+                                                </items>
+                                            </fieldType>
                                         </items>
                                     </column>
                                 </items>
